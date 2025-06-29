@@ -22,7 +22,7 @@ import { Config, loadConfig } from './config.js';
 import { z } from 'zod';
 import * as eventsource from 'eventsource';
 
-global.EventSource = eventsource.EventSource
+(global as any).EventSource = eventsource.EventSource
 
 export const createServer = async () => {
   // Load configuration and connect to servers
@@ -301,3 +301,33 @@ export const createServer = async () => {
 
   return { server, cleanup };
 };
+
+// Main execution when run directly
+async function main() {
+  const { server, cleanup } = await createServer();
+
+  // Connect to stdio transport
+  const { StdioServerTransport } = await import("@modelcontextprotocol/sdk/server/stdio.js");
+  const transport = new StdioServerTransport();
+
+  console.error("MCP Proxy Server starting...");
+
+  await server.connect(transport);
+
+  console.error("MCP Proxy Server connected and ready");
+
+  // Handle cleanup on exit
+  process.on('SIGINT', async () => {
+    console.error("Shutting down...");
+    await cleanup();
+    process.exit(0);
+  });
+}
+
+// Run main if this file is executed directly
+if (require.main === module) {
+  main().catch((error) => {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  });
+}

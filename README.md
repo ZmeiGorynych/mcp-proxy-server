@@ -33,7 +33,32 @@ The server requires a JSON configuration file that specifies the MCP servers to 
 cp config.example.json config.json
 ```
 
-Example config structure:
+### MCP-Style Configuration (Recommended)
+
+The proxy server now supports the standard MCP configuration format used by Claude, Cursor, and other MCP clients. This makes it easier to copy and paste existing configurations:
+
+```json
+{
+  "mcpServers": {
+    "server1": {
+      "command": "/path/to/server1/build/index.js"
+    },
+    "server2": {
+      "command": "server2-command",
+      "args": ["--option1", "value1"],
+      "env": ["SECRET_API_KEY"]
+    },
+    "server3": {
+      "url": "http://localhost:8080/sse"
+    }
+  }
+}
+```
+
+### Legacy Configuration Format
+
+For backward compatibility, the original configuration format is still supported:
+
 ```json
 {
   "servers": [
@@ -61,6 +86,13 @@ Example config structure:
   ]
 }
 ```
+
+### Configuration Notes
+
+- **MCP-Style Format**: Server names are defined as object keys, and transport configuration is flattened
+- **SSE Servers**: Use the `url` property directly (no need to specify `type: "sse"`)
+- **Stdio Servers**: Use `command`, `args`, and `env` properties directly
+- **Environment Variables**: The `env` array lists environment variable names to pass to the server process
 
 The config file must be provided when running the server:
 ```bash
