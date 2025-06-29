@@ -71,6 +71,29 @@ export const createClients = async (servers: ServerConfig[]): Promise<ConnectedC
         await client.connect(transport);
         console.log(`Connected to server: ${server.name}`);
 
+        // Fetch and display tools for this server
+        try {
+          const toolsResult = await client.listTools();
+          console.log(`\n📋 Tools available from ${server.name}:`);
+          if (toolsResult.tools && toolsResult.tools.length > 0) {
+            toolsResult.tools.forEach((tool, index) => {
+              console.log(`  ${index + 1}. ${tool.name}`);
+              if (tool.description) {
+                console.log(`     Description: ${tool.description}`);
+              }
+              if (tool.inputSchema) {
+                console.log(`     Input Schema: ${JSON.stringify(tool.inputSchema, null, 2).split('\n').join('\n     ')}`);
+              }
+              console.log('');
+            });
+          } else {
+            console.log(`  No tools available from ${server.name}`);
+          }
+          console.log(`Total tools from ${server.name}: ${toolsResult.tools?.length || 0}\n`);
+        } catch (toolError) {
+          console.error(`Failed to fetch tools from ${server.name}:`, toolError);
+        }
+
         clients.push({
           client,
           name: server.name,

@@ -1,28 +1,18 @@
 {
-  "servers": [
-    {
-      "name": "Example Server 1",
-      "transport": {
-        "command": "/path/to/server1/build/index.js"
-      }
+  "mcpServers": {
+    "example-server-1": {
+      "command": "/path/to/server1/build/index.js"
     },
-    {
-      "name": "Example Server 2",
-      "transport": {
-        "command": "npx",
-        "args": [
-          "@example/mcp-server",
-          "--option",
-          "value"
-        ]
-      }
+    "example-server-2": {
+      "command": "npx",
+      "args": [
+        "@example/mcp-server",
+        "--option",
+        "value"
+      ]
     },
-    {
-      "name": "Example Server 3",
-      "transport": {
-        "type": "sse",
-        "url": "http://example.com/mcp"
-      }
+    "example-server-3": {
+      "url": "http://example.com/mcp"
     }
-  ]
+  }
 }

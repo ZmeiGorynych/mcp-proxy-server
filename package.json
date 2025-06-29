@@ -7,7 +7,10 @@
     "build": "tsc",
     "start": "node dist/sse.js",
     "start:stdio": "node dist/index.js",
-    "dev": "npm run build && npm start"
+    "dev": "npm run build && npm start",
+    "test": "npm run build && node tests/run-tests.js",
+    "test:config": "npm run build && node tests/config.test.js",
+    "test:integration": "npm run build && node tests/integration.test.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.13.2",

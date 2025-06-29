@@ -1,0 +1,11 @@
+{
+  "servers": [
+    {
+      "name": "Legacy Echo Server",
+      "transport": {
+        "command": "echo",
+        "args": ["legacy-test"]
+      }
+    }
+  ]
+}

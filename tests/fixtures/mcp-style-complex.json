@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "puppeteer": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem"],
+      "env": ["HOME", "PATH"]
+    },
+    "web-search": {
+      "command": "python",
+      "args": ["-m", "mcp_server_web_search"],
+      "env": ["SEARCH_API_KEY", "PYTHONPATH"]
+    },
+    "remote-sse": {
+      "url": "https://api.example.com/mcp/sse"
+    },
+    "local-sse": {
+      "url": "http://localhost:3000/mcp"
+    }
+  }
+}

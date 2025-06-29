@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "echo-server": {
+      "command": "echo",
+      "args": ["test-server"]
+    }
+  }
+}
