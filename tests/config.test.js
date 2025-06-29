@@ -281,5 +281,94 @@ runner.test('Invalid JSON returns empty config', async () => {
   }
 });
 
+// Test MCP-style configuration with tools filtering
+runner.test('MCP-style configuration with tools filtering', async () => {
+  const config = {
+    "mcpServers": {
+      "filtered-server": {
+        "command": "echo",
+        "args": ["test"],
+        "tools": ["tool1", "tool2"]
+      },
+      "unfiltered-server": {
+        "command": "echo",
+        "args": ["test"]
+      }
+    }
+  };
+
+  createTempConfig(config);
+  mockCwd(__dirname);
+
+  try {
+    const result = await loadConfig();
+
+    if (!result.servers || result.servers.length !== 2) {
+      throw new Error('Expected 2 servers');
+    }
+
+    const filteredServer = result.servers.find(s => s.name === 'filtered-server');
+    const unfilteredServer = result.servers.find(s => s.name === 'unfiltered-server');
+
+    if (!filteredServer || !filteredServer.tools) {
+      throw new Error('Filtered server should have tools array');
+    }
+
+    if (filteredServer.tools.length !== 2) {
+      throw new Error(`Expected 2 tools, got ${filteredServer.tools.length}`);
+    }
+
+    if (!filteredServer.tools.includes('tool1') || !filteredServer.tools.includes('tool2')) {
+      throw new Error('Tools array should contain tool1 and tool2');
+    }
+
+    if (unfilteredServer && unfilteredServer.tools) {
+      throw new Error('Unfiltered server should not have tools array');
+    }
+  } finally {
+    restoreCwd();
+    cleanup();
+  }
+});
+
+// Test legacy configuration with tools filtering
+runner.test('Legacy configuration with tools filtering', async () => {
+  const config = {
+    "servers": [
+      {
+        "name": "legacy-filtered",
+        "transport": {
+          "command": "echo",
+          "args": ["test"]
+        },
+        "tools": ["legacy_tool1", "legacy_tool2"]
+      }
+    ]
+  };
+
+  createTempConfig(config);
+  mockCwd(__dirname);
+
+  try {
+    const result = await loadConfig();
+
+    if (!result.servers || result.servers.length !== 1) {
+      throw new Error('Expected 1 server');
+    }
+
+    const server = result.servers[0];
+    if (!server.tools || server.tools.length !== 2) {
+      throw new Error('Server should have 2 tools');
+    }
+
+    if (!server.tools.includes('legacy_tool1') || !server.tools.includes('legacy_tool2')) {
+      throw new Error('Tools array should contain legacy_tool1 and legacy_tool2');
+    }
+  } finally {
+    restoreCwd();
+    cleanup();
+  }
+});
+
 // Run all tests
 runner.run().catch(console.error);

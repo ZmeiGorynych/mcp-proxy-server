@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "puppeteer-limited": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer"],
+      "tools": ["puppeteer_navigate", "puppeteer_screenshot"]
+    },
+    "filesystem-limited": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem"],
+      "tools": ["read_file", "write_file", "list_directory"]
+    },
+    "unrestricted-server": {
+      "command": "echo",
+      "args": ["test"]
+    }
+  }
+}

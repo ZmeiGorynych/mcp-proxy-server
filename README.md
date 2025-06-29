@@ -93,6 +93,35 @@ For backward compatibility, the original configuration format is still supported
 - **SSE Servers**: Use the `url` property directly (no need to specify `type: "sse"`)
 - **Stdio Servers**: Use `command`, `args`, and `env` properties directly
 - **Environment Variables**: The `env` array lists environment variable names to pass to the server process
+- **Tool Filtering**: Use the optional `tools` array to specify which tools to expose from each server
+
+### Tool Filtering
+
+You can control which tools are exposed from each server by adding a `tools` array to the server configuration. This is useful when you want to:
+
+- Limit the tools available to clients for security or simplicity
+- Avoid tool name conflicts between servers
+- Create focused configurations for specific use cases
+
+**Example with tool filtering:**
+```json
+{
+  "mcpServers": {
+    "puppeteer": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer"],
+      "tools": ["puppeteer_navigate", "puppeteer_screenshot"]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem"],
+      "tools": ["read_file", "write_file"]
+    }
+  }
+}
+```
+
+If the `tools` array is omitted or empty, all tools from the server will be exposed.
 
 The config file must be provided when running the server:
 ```bash

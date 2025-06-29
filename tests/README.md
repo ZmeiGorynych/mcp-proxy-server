@@ -41,6 +41,8 @@ node tests/integration.test.js
 - ✅ Mixed server types in MCP-style format
 - ✅ Error handling for missing config files
 - ✅ Error handling for invalid JSON
+- ✅ MCP-style configuration with tool filtering
+- ✅ Legacy configuration with tool filtering
 
 ### Integration Tests (`integration.test.js`)
 - ✅ Server startup with MCP-style configuration
@@ -53,6 +55,7 @@ The `fixtures/` directory contains sample configuration files:
 
 - `mcp-style-basic.json` - Basic MCP-style configuration
 - `mcp-style-complex.json` - Complex MCP-style configuration with multiple server types
+- `mcp-style-with-tools.json` - MCP-style configuration demonstrating tool filtering
 - `legacy-format.json` - Legacy configuration format example
 
 ## Adding New Tests

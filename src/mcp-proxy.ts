@@ -67,7 +67,16 @@ export const createServer = async () => {
         );
 
         if (result.tools) {
-          const toolsWithSource = result.tools.map(tool => {
+          // Filter tools based on allowedTools configuration
+          let filteredTools = result.tools;
+          if (connectedClient.allowedTools && connectedClient.allowedTools.length > 0) {
+            filteredTools = result.tools.filter(tool =>
+              connectedClient.allowedTools!.includes(tool.name)
+            );
+            console.log(`Filtered tools for ${connectedClient.name}: ${filteredTools.length}/${result.tools.length} tools exposed`);
+          }
+
+          const toolsWithSource = filteredTools.map(tool => {
             toolToClientMap.set(tool.name, connectedClient);
             return {
               ...tool,

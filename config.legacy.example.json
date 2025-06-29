@@ -15,14 +15,16 @@
           "--option",
           "value"
         ]
-      }
+      },
+      "tools": ["specific_tool_1", "specific_tool_2"]
     },
     {
       "name": "Example Server 3",
       "transport": {
         "type": "sse",
         "url": "http://example.com/mcp"
-      }
+      },
+      "tools": ["web_search", "web_scrape"]
     }
   ]
 }

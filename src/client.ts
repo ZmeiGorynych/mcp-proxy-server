@@ -9,6 +9,7 @@ export interface ConnectedClient {
   client: Client;
   cleanup: () => Promise<void>;
   name: string;
+  allowedTools?: string[]; // Optional list of tool names to expose
 }
 
 const createClient = (server: ServerConfig): { client: Client | undefined, transport: Transport | undefined } => {
@@ -76,7 +77,16 @@ export const createClients = async (servers: ServerConfig[]): Promise<ConnectedC
           const toolsResult = await client.listTools();
           console.log(`\n📋 Tools available from ${server.name}:`);
           if (toolsResult.tools && toolsResult.tools.length > 0) {
-            toolsResult.tools.forEach((tool, index) => {
+            // Apply tool filtering if specified
+            let filteredTools = toolsResult.tools;
+            if (server.tools && server.tools.length > 0) {
+              filteredTools = toolsResult.tools.filter(tool =>
+                server.tools!.includes(tool.name)
+              );
+              console.log(`   Filtered: ${filteredTools.length}/${toolsResult.tools.length} tools (only showing configured tools)`);
+            }
+
+            filteredTools.forEach((tool, index) => {
               console.log(`  ${index + 1}. ${tool.name}`);
               if (tool.description) {
                 console.log(`     Description: ${tool.description}`);
@@ -97,6 +107,7 @@ export const createClients = async (servers: ServerConfig[]): Promise<ConnectedC
         clients.push({
           client,
           name: server.name,
+          allowedTools: server.tools,
           cleanup: async () => {
             await transport.close();
           }
