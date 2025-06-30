@@ -4,7 +4,8 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
 import { ServerConfig } from './config.js';
 
-const sleep = (time: number) => new Promise<void>(resolve => setTimeout(() => resolve(), time))
+const sleep = (time: number): Promise<void> =>
+  new Promise<void>(resolve => setTimeout(() => resolve(), time));
 export interface ConnectedClient {
   client: Client;
   cleanup: () => Promise<void>;
@@ -12,9 +13,10 @@ export interface ConnectedClient {
   allowedTools?: string[]; // Optional list of tool names to expose
 }
 
-const createClient = (server: ServerConfig): { client: Client | undefined, transport: Transport | undefined } => {
-
-  let transport: Transport | null = null
+const createClient = (
+  server: ServerConfig
+): { client: Client | undefined; transport: Transport | undefined } => {
+  let transport: Transport | null = null;
   try {
     if (server.transport.type === 'sse') {
       transport = new SSEClientTransport(new URL(server.transport.url));
@@ -22,33 +24,44 @@ const createClient = (server: ServerConfig): { client: Client | undefined, trans
       transport = new StdioClientTransport({
         command: server.transport.command,
         args: server.transport.args,
-        env: server.transport.env ? server.transport.env.reduce((o, v) => ({
-          [v]: process.env[v] || ''
-        }), {}) : undefined
+        env: server.transport.env
+          ? server.transport.env.reduce(
+              (o, v) => ({
+                [v]: process.env[v] || '',
+              }),
+              {}
+            )
+          : undefined,
       });
     }
   } catch (error) {
-    console.error(`Failed to create transport ${server.transport.type || 'stdio'} to ${server.name}:`, error);
+    console.error(
+      `Failed to create transport ${server.transport.type || 'stdio'} to ${server.name}:`,
+      error
+    );
   }
 
   if (!transport) {
-    console.warn(`Transport ${server.name} not available.`)
-    return { transport: undefined, client: undefined }
+    console.warn(`Transport ${server.name} not available.`);
+    return { transport: undefined, client: undefined };
   }
 
-  const client = new Client({
-    name: 'mcp-proxy-client',
-    version: '1.0.0',
-  }, {
-    capabilities: {
-      prompts: {},
-      resources: { subscribe: true },
-      tools: {}
+  const client = new Client(
+    {
+      name: 'mcp-proxy-client',
+      version: '1.0.0',
+    },
+    {
+      capabilities: {
+        prompts: {},
+        resources: { subscribe: true },
+        tools: {},
+      },
     }
-  });
+  );
 
-  return { client, transport }
-}
+  return { client, transport };
+};
 
 export const createClients = async (servers: ServerConfig[]): Promise<ConnectedClient[]> => {
   const clients: ConnectedClient[] = [];
@@ -56,16 +69,15 @@ export const createClients = async (servers: ServerConfig[]): Promise<ConnectedC
   for (const server of servers) {
     console.log(`Connecting to server: ${server.name}`);
 
-    const waitFor = 2500
-    const retries = 3
-    let count = 0
-    let retry = true
+    const waitFor = 2500;
+    const retries = 3;
+    let count = 0;
+    let retry = true;
 
     while (retry) {
-
-      const { client, transport } = createClient(server)
+      const { client, transport } = createClient(server);
       if (!client || !transport) {
-        break
+        break;
       }
 
       try {
@@ -80,10 +92,10 @@ export const createClients = async (servers: ServerConfig[]): Promise<ConnectedC
             // Apply tool filtering if specified
             let filteredTools = toolsResult.tools;
             if (server.tools && server.tools.length > 0) {
-              filteredTools = toolsResult.tools.filter(tool =>
-                server.tools!.includes(tool.name)
+              filteredTools = toolsResult.tools.filter(tool => server.tools!.includes(tool.name));
+              console.log(
+                `   Filtered: ${filteredTools.length}/${toolsResult.tools.length} tools (only showing configured tools)`
               );
-              console.log(`   Filtered: ${filteredTools.length}/${toolsResult.tools.length} tools (only showing configured tools)`);
             }
 
             filteredTools.forEach((tool, index) => {
@@ -92,7 +104,9 @@ export const createClients = async (servers: ServerConfig[]): Promise<ConnectedC
                 console.log(`     Description: ${tool.description}`);
               }
               if (tool.inputSchema) {
-                console.log(`     Input Schema: ${JSON.stringify(tool.inputSchema, null, 2).split('\n').join('\n     ')}`);
+                console.log(
+                  `     Input Schema: ${JSON.stringify(tool.inputSchema, null, 2).split('\n').join('\n     ')}`
+                );
               }
               console.log('');
             });
@@ -110,26 +124,25 @@ export const createClients = async (servers: ServerConfig[]): Promise<ConnectedC
           allowedTools: server.tools,
           cleanup: async () => {
             await transport.close();
-          }
+          },
         });
 
-        break
-
+        break;
       } catch (error) {
         console.error(`Failed to connect to ${server.name}:`, error);
-        count++
-        retry = (count < retries)
+        count++;
+        retry = count < retries;
         if (retry) {
           try {
-            await client.close()
-          } catch { }
+            await client.close();
+          } catch {
+            // Ignore cleanup errors
+          }
           console.log(`Retry connection to ${server.name} in ${waitFor}ms (${count}/${retries})`);
-          await sleep(waitFor)
+          await sleep(waitFor);
         }
       }
-
     }
-
   }
 
   return clients;

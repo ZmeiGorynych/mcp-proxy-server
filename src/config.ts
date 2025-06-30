@@ -1,20 +1,19 @@
 import { readFile } from 'fs/promises';
 import { resolve } from 'path';
 
-
 export type TransportConfigStdio = {
-  type?: 'stdio'
+  type?: 'stdio';
   command: string;
   args?: string[];
-  env?: string[]
-}
+  env?: string[];
+};
 
 export type TransportConfigSSE = {
-  type: 'sse'
-  url: string
-}
+  type: 'sse';
+  url: string;
+};
 
-export type TransportConfig = TransportConfigSSE | TransportConfigStdio
+export type TransportConfig = TransportConfigSSE | TransportConfigStdio;
 
 export interface ServerConfig {
   name: string;
@@ -32,12 +31,12 @@ export type McpServerConfigStdio = {
   args?: string[];
   env?: string[];
   tools?: string[]; // Optional list of tool names to expose
-}
+};
 
 export type McpServerConfigSSE = {
   url: string;
   tools?: string[]; // Optional list of tool names to expose
-}
+};
 
 export type McpServerConfig = McpServerConfigStdio | McpServerConfigSSE;
 
@@ -49,8 +48,13 @@ export interface McpStyleConfig {
 export type AnyConfig = Config | McpStyleConfig;
 
 // Type guard to check if config is MCP-style
-function isMcpStyleConfig(config: any): config is McpStyleConfig {
-  return config && typeof config === 'object' && 'mcpServers' in config && !('servers' in config);
+function isMcpStyleConfig(config: unknown): config is McpStyleConfig {
+  return (
+    config !== null &&
+    typeof config === 'object' &&
+    'mcpServers' in config &&
+    !('servers' in config)
+  );
 }
 
 // Convert MCP-style config to internal format
@@ -64,9 +68,9 @@ function convertMcpStyleConfig(mcpConfig: McpStyleConfig): Config {
         name,
         transport: {
           type: 'sse',
-          url: serverConfig.url
+          url: serverConfig.url,
         },
-        tools: serverConfig.tools
+        tools: serverConfig.tools,
       });
     } else {
       // Stdio transport
@@ -76,9 +80,9 @@ function convertMcpStyleConfig(mcpConfig: McpStyleConfig): Config {
           type: 'stdio',
           command: serverConfig.command,
           args: serverConfig.args,
-          env: serverConfig.env
+          env: serverConfig.env,
         },
-        tools: serverConfig.tools
+        tools: serverConfig.tools,
       });
     }
   }

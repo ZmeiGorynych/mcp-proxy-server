@@ -10,7 +10,12 @@
     "dev": "npm run build && npm start",
     "test": "npm run build && node tests/run-tests.js",
     "test:config": "npm run build && node tests/config.test.js",
-    "test:integration": "npm run build && node tests/integration.test.js"
+    "test:integration": "npm run build && node tests/integration.test.js",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --write src/**/*.ts",
+    "format:check": "prettier --check src/**/*.ts",
+    "check": "npm run lint && npm run format:check && npm run build && npm test"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.13.2",
@@ -21,7 +26,14 @@
   "devDependencies": {
     "@types/express": "^5.0.3",
     "@types/node": "^24.0.7",
-    "typescript": "^5.5.3"
+    "@typescript-eslint/eslint-plugin": "^8.35.0",
+    "@typescript-eslint/parser": "^8.35.0",
+    "eslint": "^9.30.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.5.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^8.35.0"
   },
   "private": true
 }
