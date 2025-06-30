@@ -19,6 +19,7 @@ export type TransportConfig = TransportConfigSSE | TransportConfigStdio
 export interface ServerConfig {
   name: string;
   transport: TransportConfig;
+  tools?: string[]; // Optional list of tool names to expose
 }
 
 export interface Config {
@@ -30,10 +31,12 @@ export type McpServerConfigStdio = {
   command: string;
   args?: string[];
   env?: string[];
+  tools?: string[]; // Optional list of tool names to expose
 }
 
 export type McpServerConfigSSE = {
   url: string;
+  tools?: string[]; // Optional list of tool names to expose
 }
 
 export type McpServerConfig = McpServerConfigStdio | McpServerConfigSSE;
@@ -62,7 +65,8 @@ function convertMcpStyleConfig(mcpConfig: McpStyleConfig): Config {
         transport: {
           type: 'sse',
           url: serverConfig.url
-        }
+        },
+        tools: serverConfig.tools
       });
     } else {
       // Stdio transport
@@ -73,7 +77,8 @@ function convertMcpStyleConfig(mcpConfig: McpStyleConfig): Config {
           command: serverConfig.command,
           args: serverConfig.args,
           env: serverConfig.env
-        }
+        },
+        tools: serverConfig.tools
       });
     }
   }

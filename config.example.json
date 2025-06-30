@@ -9,10 +9,12 @@
         "@example/mcp-server",
         "--option",
         "value"
-      ]
+      ],
+      "tools": ["specific_tool_1", "specific_tool_2"]
     },
     "example-server-3": {
-      "url": "http://example.com/mcp"
+      "url": "http://example.com/mcp",
+      "tools": ["web_search", "web_scrape"]
     }
   }
 }
