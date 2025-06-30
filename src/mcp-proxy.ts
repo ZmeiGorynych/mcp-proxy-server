@@ -1,4 +1,4 @@
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import {
   CallToolRequestSchema,
   GetPromptRequestSchema,
@@ -15,16 +15,17 @@ import {
   ListResourceTemplatesResultSchema,
   ResourceTemplate,
   CompatibilityCallToolResultSchema,
-  GetPromptResultSchema
-} from "@modelcontextprotocol/sdk/types.js";
+  GetPromptResultSchema,
+} from '@modelcontextprotocol/sdk/types.js';
 import { createClients, ConnectedClient } from './client.js';
-import { Config, loadConfig } from './config.js';
+import { loadConfig } from './config.js';
 import { z } from 'zod';
 import * as eventsource from 'eventsource';
 
-(global as any).EventSource = eventsource.EventSource
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(global as any).EventSource = eventsource.EventSource;
 
-export const createServer = async () => {
+export const createServer = async (): Promise<{ server: Server; cleanup: () => Promise<void> }> => {
   // Load configuration and connect to servers
   const config = await loadConfig();
   const connectedClients = await createClients(config.servers);
@@ -37,8 +38,8 @@ export const createServer = async () => {
 
   const server = new Server(
     {
-      name: "mcp-proxy-server",
-      version: "1.0.0",
+      name: 'mcp-proxy-server',
+      version: '1.0.0',
     },
     {
       capabilities: {
@@ -46,11 +47,11 @@ export const createServer = async () => {
         resources: { subscribe: true },
         tools: {},
       },
-    },
+    }
   );
 
   // List Tools Handler
-  server.setRequestHandler(ListToolsRequestSchema, async (request) => {
+  server.setRequestHandler(ListToolsRequestSchema, async request => {
     const allTools: Tool[] = [];
     toolToClientMap.clear();
 
@@ -60,8 +61,8 @@ export const createServer = async () => {
           {
             method: 'tools/list',
             params: {
-              _meta: request.params?._meta
-            }
+              _meta: request.params?._meta,
+            },
           },
           ListToolsResultSchema
         );
@@ -73,14 +74,16 @@ export const createServer = async () => {
             filteredTools = result.tools.filter(tool =>
               connectedClient.allowedTools!.includes(tool.name)
             );
-            console.log(`Filtered tools for ${connectedClient.name}: ${filteredTools.length}/${result.tools.length} tools exposed`);
+            console.log(
+              `Filtered tools for ${connectedClient.name}: ${filteredTools.length}/${result.tools.length} tools exposed`
+            );
           }
 
           const toolsWithSource = filteredTools.map(tool => {
             toolToClientMap.set(tool.name, connectedClient);
             return {
               ...tool,
-              description: `[${connectedClient.name}] ${tool.description || ''}`
+              description: `[${connectedClient.name}] ${tool.description || ''}`,
             };
           });
           allTools.push(...toolsWithSource);
@@ -94,7 +97,7 @@ export const createServer = async () => {
   });
 
   // Call Tool Handler
-  server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  server.setRequestHandler(CallToolRequestSchema, async request => {
     const { name, arguments: args } = request.params;
     const clientForTool = toolToClientMap.get(name);
 
@@ -113,9 +116,9 @@ export const createServer = async () => {
             name,
             arguments: args || {},
             _meta: {
-              progressToken: request.params._meta?.progressToken
-            }
-          }
+              progressToken: request.params._meta?.progressToken,
+            },
+          },
         },
         CompatibilityCallToolResultSchema
       );
@@ -126,7 +129,7 @@ export const createServer = async () => {
   });
 
   // Get Prompt Handler
-  server.setRequestHandler(GetPromptRequestSchema, async (request) => {
+  server.setRequestHandler(GetPromptRequestSchema, async request => {
     const { name } = request.params;
     const clientForPrompt = promptToClientMap.get(name);
 
@@ -145,9 +148,9 @@ export const createServer = async () => {
             name,
             arguments: request.params.arguments || {},
             _meta: request.params._meta || {
-              progressToken: undefined
-            }
-          }
+              progressToken: undefined,
+            },
+          },
         },
         GetPromptResultSchema
       );
@@ -161,7 +164,7 @@ export const createServer = async () => {
   });
 
   // List Prompts Handler
-  server.setRequestHandler(ListPromptsRequestSchema, async (request) => {
+  server.setRequestHandler(ListPromptsRequestSchema, async request => {
     const allPrompts: z.infer<typeof ListPromptsResultSchema>['prompts'] = [];
     promptToClientMap.clear();
 
@@ -173,9 +176,9 @@ export const createServer = async () => {
             params: {
               cursor: request.params?.cursor,
               _meta: request.params?._meta || {
-                progressToken: undefined
-              }
-            }
+                progressToken: undefined,
+              },
+            },
           },
           ListPromptsResultSchema
         );
@@ -185,7 +188,7 @@ export const createServer = async () => {
             promptToClientMap.set(prompt.name, connectedClient);
             return {
               ...prompt,
-              description: `[${connectedClient.name}] ${prompt.description || ''}`
+              description: `[${connectedClient.name}] ${prompt.description || ''}`,
             };
           });
           allPrompts.push(...promptsWithSource);
@@ -197,12 +200,12 @@ export const createServer = async () => {
 
     return {
       prompts: allPrompts,
-      nextCursor: request.params?.cursor
+      nextCursor: request.params?.cursor,
     };
   });
 
   // List Resources Handler
-  server.setRequestHandler(ListResourcesRequestSchema, async (request) => {
+  server.setRequestHandler(ListResourcesRequestSchema, async request => {
     const allResources: z.infer<typeof ListResourcesResultSchema>['resources'] = [];
     resourceToClientMap.clear();
 
@@ -213,8 +216,8 @@ export const createServer = async () => {
             method: 'resources/list',
             params: {
               cursor: request.params?.cursor,
-              _meta: request.params?._meta
-            }
+              _meta: request.params?._meta,
+            },
           },
           ListResourcesResultSchema
         );
@@ -224,7 +227,7 @@ export const createServer = async () => {
             resourceToClientMap.set(resource.uri, connectedClient);
             return {
               ...resource,
-              name: `[${connectedClient.name}] ${resource.name || ''}`
+              name: `[${connectedClient.name}] ${resource.name || ''}`,
             };
           });
           allResources.push(...resourcesWithSource);
@@ -236,12 +239,12 @@ export const createServer = async () => {
 
     return {
       resources: allResources,
-      nextCursor: undefined
+      nextCursor: undefined,
     };
   });
 
   // Read Resource Handler
-  server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+  server.setRequestHandler(ReadResourceRequestSchema, async request => {
     const { uri } = request.params;
     const clientForResource = resourceToClientMap.get(uri);
 
@@ -255,8 +258,8 @@ export const createServer = async () => {
           method: 'resources/read',
           params: {
             uri,
-            _meta: request.params._meta
-          }
+            _meta: request.params._meta,
+          },
         },
         ReadResourceResultSchema
       );
@@ -267,7 +270,7 @@ export const createServer = async () => {
   });
 
   // List Resource Templates Handler
-  server.setRequestHandler(ListResourceTemplatesRequestSchema, async (request) => {
+  server.setRequestHandler(ListResourceTemplatesRequestSchema, async request => {
     const allTemplates: ResourceTemplate[] = [];
 
     for (const connectedClient of connectedClients) {
@@ -278,9 +281,9 @@ export const createServer = async () => {
             params: {
               cursor: request.params?.cursor,
               _meta: request.params?._meta || {
-                progressToken: undefined
-              }
-            }
+                progressToken: undefined,
+              },
+            },
           },
           ListResourceTemplatesResultSchema
         );
@@ -289,7 +292,9 @@ export const createServer = async () => {
           const templatesWithSource = result.resourceTemplates.map(template => ({
             ...template,
             name: `[${connectedClient.name}] ${template.name || ''}`,
-            description: template.description ? `[${connectedClient.name}] ${template.description}` : undefined
+            description: template.description
+              ? `[${connectedClient.name}] ${template.description}`
+              : undefined,
           }));
           allTemplates.push(...templatesWithSource);
         }
@@ -300,11 +305,11 @@ export const createServer = async () => {
 
     return {
       resourceTemplates: allTemplates,
-      nextCursor: request.params?.cursor
+      nextCursor: request.params?.cursor,
     };
   });
 
-  const cleanup = async () => {
+  const cleanup = async (): Promise<void> => {
     await Promise.all(connectedClients.map(({ cleanup }) => cleanup()));
   };
 
@@ -312,22 +317,22 @@ export const createServer = async () => {
 };
 
 // Main execution when run directly
-async function main() {
+async function main(): Promise<void> {
   const { server, cleanup } = await createServer();
 
   // Connect to stdio transport
-  const { StdioServerTransport } = await import("@modelcontextprotocol/sdk/server/stdio.js");
+  const { StdioServerTransport } = await import('@modelcontextprotocol/sdk/server/stdio.js');
   const transport = new StdioServerTransport();
 
-  console.error("MCP Proxy Server starting...");
+  console.error('MCP Proxy Server starting...');
 
   await server.connect(transport);
 
-  console.error("MCP Proxy Server connected and ready");
+  console.error('MCP Proxy Server connected and ready');
 
   // Handle cleanup on exit
   process.on('SIGINT', async () => {
-    console.error("Shutting down...");
+    console.error('Shutting down...');
     await cleanup();
     process.exit(0);
   });
@@ -335,8 +340,8 @@ async function main() {
 
 // Run main if this file is executed directly
 if (require.main === module) {
-  main().catch((error) => {
-    console.error("Failed to start server:", error);
+  main().catch(error => {
+    console.error('Failed to start server:', error);
     process.exit(1);
   });
 }

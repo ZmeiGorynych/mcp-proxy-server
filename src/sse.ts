@@ -1,26 +1,26 @@
-import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
-import express from "express";
-import { createServer } from "./mcp-proxy.js";
+import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
+import express from 'express';
+import { createServer } from './mcp-proxy.js';
 
-async function startServer() {
+async function startServer(): Promise<void> {
   const app = express();
 
   const { server, cleanup } = await createServer();
 
   let transport: SSEServerTransport;
 
-  app.get("/sse", async (req, res) => {
-    console.log("Received connection");
-    transport = new SSEServerTransport("/message", res);
+  app.get('/sse', async (req, res) => {
+    console.log('Received connection');
+    transport = new SSEServerTransport('/message', res);
     await server.connect(transport);
 
-    server.onerror = (err) => {
-      console.error(`Server onerror: ${err.stack}`)
-    }
+    server.onerror = (err: Error): void => {
+      console.error(`Server onerror: ${err.stack}`);
+    };
 
-    server.onclose = async () => {
-      console.log('Server onclose')
-      if (process.env.KEEP_SERVER_OPEN !== "1") {
+    server.onclose = async (): Promise<void> => {
+      console.log('Server onclose');
+      if (process.env.KEEP_SERVER_OPEN !== '1') {
         await cleanup();
         await server.close();
         process.exit(0);
@@ -28,8 +28,8 @@ async function startServer() {
     };
   });
 
-  app.post("/message", async (req, res) => {
-    console.log("Received message");
+  app.post('/message', async (req, res) => {
+    console.log('Received message');
     await transport.handlePostMessage(req, res);
   });
 
