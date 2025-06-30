@@ -1,3 +1,9 @@
+# Enhancements in this fork:
+ * Support filtering of tools by name
+ * Support Claude-style mcp server json config format
+ * Added linting configs
+
+
 # MCP Proxy Server
 
 An MCP proxy server that aggregates and serves multiple MCP resource servers through a single interface. This server acts as a central hub that can:
